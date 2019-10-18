@@ -386,7 +386,7 @@ conPos xs = zip xs [1..(length xs)]
 -- ----------------------------------------------------------------------------
 
 deBaseABase10 :: Int -> [Int] -> Int
-deBaseABase10 b xs = undefined
+deBaseABase10 b xs = 
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 23. Dos listas xs, ys de la misma longitud son perpendiculares si
@@ -435,6 +435,9 @@ prodEsc (x:xs) ys = [abs (x-y) | y<-ys] ++ prodEsc xs ys
 cercanos :: [Int] -> [Int] -> [(Int,Int)]
 cercanos xs ys = undefined
 -}
+cercanos xs ys =
+  let d = minimum [abs]
+
 -- ----------------------------------------------------------------------------
 -- Ejercicio 25. Dada una lista de números enteros, definiremos el mayor salto
 -- como la mayor distancia entre números consecutivos de la lista. Por ejemplo,
@@ -533,7 +536,9 @@ esCuadratica xs = undefined
 -- ----------------------------------------------------------------------------
 
 encadenado :: [Int] -> Bool
-encadenado xs = undefined
+encadenado [] = False
+encadenado [x] = True
+encadenado (x:xs) = last(show x) == head(show(head xs)) && encadenado xs
 
 -- ============================================================================
 
