@@ -4,3 +4,4 @@ Práctivas hechas en clase.
 
 Para tutoria:
 -QuickCheck
+-No puedo instalar librerias
