@@ -2,6 +2,5 @@
 Práctivas hechas en clase.
 
 
-Para tutoria:
--QuickCheck
--No puedo instalar librerias
+la 4 no esta hecha
+tal vez haya funciones suletas sin hacer en cada relacion
