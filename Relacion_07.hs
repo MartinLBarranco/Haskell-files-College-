@@ -321,7 +321,7 @@ superparS n = all even (digitos n)
 -- ----------------------------------------------------------------------------
 
 cuadradosF :: [Int] -> [Int]
-cuadradosF xs = undefined
+cuadradosF xs = foldr (\ x xs -> (x^2) : xs) [] xs
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 18. Definir usando 'foldr' la función
@@ -332,7 +332,7 @@ cuadradosF xs = undefined
 -- ----------------------------------------------------------------------------
 
 imparesF :: [Int] -> [Int]
-imparesF xs = undefined
+imparesF xs = foldr (\x xs -> if odd x then x:xs else xs) [] xs
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 19. Definir usando 'foldr' la función
@@ -343,7 +343,7 @@ imparesF xs = undefined
 -- ----------------------------------------------------------------------------
 
 sumaCuadradosImparesF :: [Int] -> Int
-sumaCuadradosImparesF xs = undefined
+sumaCuadradosImparesF xs = foldr (\ x xs -> if odd x then x+xs else xs) 0 xs
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 20. Definir usando 'foldr' la función
@@ -356,7 +356,7 @@ sumaCuadradosImparesF xs = undefined
 -- ----------------------------------------------------------------------------
 
 enRangoF :: Int -> Int -> [Int] -> [Int]
-enRangoF a b xs = undefined
+enRangoF a b xs = foldr (\ x xs -> if x>=a && x<= b then x:xs else xs) [] xs
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 21. Definir usando 'foldr' la función
@@ -367,7 +367,7 @@ enRangoF a b xs = undefined
 -- ----------------------------------------------------------------------------
 
 sustituyeImparF :: [Int] -> [Int]
-sustituyeImparF xs = undefined
+sustituyeImparF xs =  foldr (\ x xs -> if odd x then (x+1):xs else x:xs) [] xs
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 22. Definir usando 'foldr' la función
@@ -379,7 +379,7 @@ sustituyeImparF xs = undefined
 -- ----------------------------------------------------------------------------
 
 expandeParesF :: [Int] -> [Int]
-expandeParesF xs = undefined
+expandeParesF xs =  foldr (\ x xs -> if even x then [x,x]++xs else x:xs) [] xs
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 23. Una expresión factorizada es una secuencia de pares formados
@@ -396,7 +396,7 @@ expandeParesF xs = undefined
 -- ----------------------------------------------------------------------------
 
 expansionF :: [(Int,Int)] -> Int
-expansionF xs = undefined
+expansionF xs = foldr (\ (x,y) xs -> (x^y) * xs) 1 xs
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 24. La distancia Hamming entre dos listas es el número de
@@ -419,7 +419,7 @@ expansionF xs = undefined
 -- ----------------------------------------------------------------------------
 
 distanciaHammingF :: Eq a => [a] -> [a] -> Int
-distanciaHammingF xs ys = undefined
+distanciaHammingF xs ys =  foldr (\ (x,y) xs -> if x/=y then 1+xs else xs) 0 (zip xs ys)
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 25. El trozo inicial de los elementos de una lista que cumplen
@@ -439,7 +439,7 @@ distanciaHammingF xs ys = undefined
 -- ----------------------------------------------------------------------------
 
 trozoInicialParesF :: [Int] -> [Int]
-trozoInicialParesF xs = undefined
+trozoInicialParesF xs = foldr (\ x xs -> if odd x then [] else x:xs) [] xs
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 26. Una sustitución es una lista de parejas [(x1,y1),...,(xn,yn)]
@@ -484,7 +484,7 @@ sustituyeLstF xs zs = undefined
 -- ----------------------------------------------------------------------------
 
 relacionadosF :: (a -> a -> Bool) -> [a] -> Bool
-relacionadosF r xs = undefined
+relacionadosF r xs = foldr (\ (x,y) xs -> if r x y then True && xs else False ) True (zip xs (tail xs))
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 29. Definir usando 'foldr' la función
@@ -498,7 +498,7 @@ relacionadosF r xs = undefined
 -- ----------------------------------------------------------------------------
 
 reparteF :: (Ord a) => a -> [a] -> ([a],[a])
-reparteF e xs = undefined
+reparteF e xs = (foldr (\ x xs -> if x<e then x:xs else xs) [] xs,foldr (\ x xs -> if x>e then x:xs else xs) [] xs)
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 30. Definir usando 'foldr' la función
@@ -510,6 +510,6 @@ reparteF e xs = undefined
 -- ----------------------------------------------------------------------------
 
 superparF :: Int -> Bool
-superparF n = undefined
+superparF n = foldr (\x xs -> if even(digitToInt x) && xs then True else False) True (show n)
 
 -- ============================================================================
