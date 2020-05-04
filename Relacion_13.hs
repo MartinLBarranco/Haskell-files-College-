@@ -31,7 +31,7 @@ type Matriz a = Array (Int,Int) a
 -- ----------------------------------------------------------------------------
 
 listaVector :: [a] -> Vector a
-listaVector xs = array (1,length xs) (zip [1..(length xs)] xs)
+listaVector xs = array (1, (length xs)) [(i, xs!!(i-1)) | i<-[1..(length xs)]]
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 2. Definir la función
@@ -44,8 +44,7 @@ listaVector xs = array (1,length xs) (zip [1..(length xs)] xs)
 -- ----------------------------------------------------------------------------
 
 listaMatriz :: [[a]] -> Matriz a
-listaMatriz xss =
-  array ((1,1),(length xss, length (head xss))) [((i,j),(xss!!(i-1))!!(j-1)) |i<-[1..(length xss)],j<-[1..length (head xss)] ]
+listaMatriz xss = array ((1,1),(length xss, length (head xss)) ) [((i,j), ((xss!!(i-1))!!(j-1)) ) | i<-[1..(length xss)], j<-[1..length(head xss)]]
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 3. Definir la función
@@ -55,7 +54,7 @@ listaMatriz xss =
 -- ----------------------------------------------------------------------------
 
 numFilas :: Matriz a -> Int
-numFilas m = fst(snd(bounds m))
+numFilas m = fst(snd (bounds m))
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 4. Definir la función
@@ -66,7 +65,7 @@ numFilas m = fst(snd(bounds m))
 -- ----------------------------------------------------------------------------
 
 numColumnas :: Matriz a -> Int
-numColumnas  m = snd(snd(bounds m))
+numColumnas m = snd(snd(bounds m))
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 5. Definir la función
@@ -77,7 +76,7 @@ numColumnas  m = snd(snd(bounds m))
 -- ----------------------------------------------------------------------------
 
 dimension :: Matriz a -> (Int,Int)
-dimension m = snd (bounds m)
+dimension m = snd(bounds m)
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 6. Definir la función
@@ -88,20 +87,21 @@ dimension m = snd (bounds m)
 -- ----------------------------------------------------------------------------
 
 vectorLista :: Vector a -> [a]
-vectorLista v = [v!i | i<-indices v]
+vectorLista v = elems v
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 7. Definir la función
 --   separa :: Int -> [a] -> [[a]]
 -- tal que '(separa n xs)' es la lista obtenida separando los elementos de la
--- lista 'xs' en grupos de 'n' elementos (salvo el último que puede tener menos
+-- list 'xs' en grupos de 'n' elementos (salvo el último que puede tener menos
 -- de 'n' elementos). Por ejemplo,
 --   separa 3 [1..11]  ==  [[1,2,3],[4,5,6],[7,8,9],[10,11]]
 -- ----------------------------------------------------------------------------
 
 separa :: Int -> [a] -> [[a]]
+separa n [] = [[]]
 separa n xs | length xs <= n = [xs]
-            | otherwise = [take n xs] ++ separa n (drop n xs)
+            | otherwise = [(take n xs)] ++separa n (drop n xs) 
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 8. Definir la función
@@ -112,12 +112,9 @@ separa n xs | length xs <= n = [xs]
 --                                     ((2,1),3),((2,2),2),((2,3),6)])  ==
 --     [[5,1,0],[3,2,6]]
 -- ----------------------------------------------------------------------------
-listamatriz :: Matriz a -> [a]
-listamatriz m = [m!i | i<-indices m]
-
 
 matrizLista :: Matriz a -> [[a]]
-matrizLista m = separa (numColumnas m) (listamatriz m)
+matrizLista m = separa (numColumnas m) (elems m)
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 9. Definir la función
@@ -130,8 +127,8 @@ matrizLista m = separa (numColumnas m) (listamatriz m)
 -- ----------------------------------------------------------------------------
 
 sumaMatrices :: Num a => Matriz a -> Matriz a -> Matriz a
-sumaMatrices m q | dimension m == dimension q = array (bounds m) [(i,(m!i + q!i)) | i <- indices m]
-                 | otherwise = error ("Mal")
+sumaMatrices m n | numFilas m == numFilas n && numColumnas m == numColumnas n = array (bounds m) [((i),(m!i + n!i)) | i<- indices m]
+                 |otherwise = error("No es posible hacer la suma")
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 10. Definir la función
@@ -143,7 +140,7 @@ sumaMatrices m q | dimension m == dimension q = array (bounds m) [(i,(m!i + q!i)
 -- ----------------------------------------------------------------------------
 
 filaMat :: Int -> Matriz a -> Vector a
-filaMat n m = listaVector [m!(n,i) | i<-[1..(numColumnas m)]]
+filaMat n m = array (1, numColumnas m) [(j, m!(n,j)) | j<-[1..(numColumnas m)]]
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 11. Definir la función
@@ -155,7 +152,7 @@ filaMat n m = listaVector [m!(n,i) | i<-[1..(numColumnas m)]]
 -- ----------------------------------------------------------------------------
 
 columnaMat :: Int -> Matriz a -> Vector a
-columnaMat n m = listaVector [m!(i,n) | i<-[1..(numColumnas m)]]
+columnaMat n m = array (1, numFilas m) [(j, m!(j,n)) | j<-[1..(numFilas m)]]
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 12. Definir la función
@@ -166,7 +163,7 @@ columnaMat n m = listaVector [m!(i,n) | i<-[1..(numColumnas m)]]
 -- ----------------------------------------------------------------------------
 
 prodEscalar :: Num a => Vector a -> Vector a -> a
-prodEscalar v w = sum(zipWith (*) (vectorLista v) (vectorLista w))
+prodEscalar v w= sum(zipWith (*) (vectorLista v) (vectorLista w))
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 13. Definir la función
@@ -176,9 +173,15 @@ prodEscalar v w = sum(zipWith (*) (vectorLista v) (vectorLista w))
 --   matrizLista (prodEscalarMatriz 2 (listaMatriz [[3,1],[2,4]]))  ==
 --     [[6,2],[4,8]]
 -- ----------------------------------------------------------------------------
+validas :: Matriz a -> Matriz a -> Bool
+validas m p | numColumnas m == numFilas p = True
+            | otherwise = False
+
+producto :: Num a => Matriz a -> Matriz a -> Matriz a
+producto m p = array ((1,1),(numFilas m, numColumnas p)) [( (i,j),(prodEscalar (filaMat i m) (columnaMat j p)) ) | i<-[1..numFilas m], j<-[1..numColumnas p]]
 
 prodEscalarMatriz :: Num a => a -> Matriz a -> Matriz a
-prodEscalarMatriz k m = array (bounds m) [(i,(k*(m!i))) | i<- indices m]
+prodEscalarMatriz k m = array (bounds m) [(i, k*(m!i)) | i<- (indices m)]
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 14. Definir la función
@@ -194,8 +197,8 @@ prodEscalarMatriz k m = array (bounds m) [(i,(k*(m!i))) | i<- indices m]
 -- ----------------------------------------------------------------------------
 
 prodMatrices :: Num a => Matriz a -> Matriz a -> Matriz a
-prodMatrices m1 m2 =
-  array ((1,1),(numFilas m1,numColumnas m2)) [((i,j),prodEscalar (filaMat i m1 ) (columnaMat j m2)) | i<-[1..(numFilas m1)],j<-[1..(numColumnas m2)]]
+prodMatrices m p | validas m p = producto m p
+                 | otherwise = error("No se pueden multiplicar")
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 15. Definir la función
@@ -223,7 +226,7 @@ potencia m n = prodMatrices m (potencia m (n-1))
 -- ----------------------------------------------------------------------------
 
 traspuesta :: Matriz a -> Matriz a
-traspuesta m = array ((1,1),(numColumnas m, numFilas m)) [((i,j),m!(j,i)) | i<-[1..(numColumnas m)],j<-[1..(numFilas m)]]
+traspuesta m = array ((1,1),(numColumnas m, numFilas m)) [( (i,j),(m!(j,i) )) | i<-[1..numColumnas m], j<-[1..numFilas m]]
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 17. Definir la función
@@ -235,7 +238,17 @@ traspuesta m = array ((1,1),(numColumnas m, numFilas m)) [((i,j),m!(j,i)) | i<-[
 -- ----------------------------------------------------------------------------
 
 submatriz :: Int -> Int -> Matriz a -> Matriz a
-submatriz f c m = undefined
+submatriz f c m =
+  let (p,q) = dimension m
+  in array ((1,1),(p-1,q-1))
+           [( (i,j) , (m!((fun i f),(fun j c))) ) |
+            i <- [1..p-1], j <- [1..q-1]]
+
+fun a b =
+  if a < b
+  then a
+  else a+1
+
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 18. Definir la función
@@ -247,8 +260,15 @@ submatriz f c m = undefined
 --   determinante (listaMatriz [[2,1,5],[1,2,3],[5,4,2]])  ==  -33
 -- ----------------------------------------------------------------------------
 
+deter :: Num a => Matriz a -> a
+deter m | numFilas m == 1 && numColumnas m == 1 = head(elems m)
+        |otherwise = sum[((-1)^(i+1))*m!(1,i)*(determinante (submatriz 1 i m)) | i<-[1..numColumnas m]]
+
+
+
 determinante :: Num a => Matriz a -> a
-determinante = undefined
+determinante m |esCuadrada m = deter m
+               |otherwise = error("no se puede hayar el determinante")
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 19. Definir la función
@@ -270,10 +290,13 @@ esCuadrada m = numFilas m == numColumnas m
 --   esSimetrica (listaMatriz [[5,1,3],[1,4,7],[3,7,2]])  ==  True
 --   esSimetrica (listaMatriz [[5,1,3],[1,4,7],[3,4,2]])  ==  False
 -- ----------------------------------------------------------------------------
+iguales :: Eq a => Matriz a -> Matriz a -> Bool
+iguales m p | dimension m == dimension p = and[m!i == p!i | i<-indices m]
+            |otherwise = False
+
 
 esSimetrica :: Eq a => Matriz a -> Bool
-esSimetrica m | esCuadrada m = and[m!(i,j) == m!(j,i) | i<-[1..(numFilas m)],j<-[1..(numFilas m)]]
-              | otherwise = False
+esSimetrica m = iguales m (traspuesta m)
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 21. Definir la función
@@ -283,9 +306,14 @@ esSimetrica m | esCuadrada m = and[m!(i,j) == m!(j,i) | i<-[1..(numFilas m)],j<-
 --   esTriangularSuperior (listaMatriz [[1,2,1],[0,4,7],[0,0,5]])  ==  True
 --   esTriangularSuperior (listaMatriz [[1,2,3],[1,2,4],[1,2,5]])  ==  False
 -- ----------------------------------------------------------------------------
+triangulo :: (Num a, Eq a) => Matriz a -> Bool
+triangulo m = and[m!(i,j) == 0 | i<-[1..numFilas m], j<-[1..numColumnas m], j<i]
+
+
 
 esTriangularSuperior :: (Num a, Eq a) => Matriz a -> Bool
-esTriangularSuperior m = undefined
+esTriangularSuperior m | esCuadrada m = triangulo m
+                       | otherwise = error("tpm")
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 22. Definir la función
@@ -296,8 +324,9 @@ esTriangularSuperior m = undefined
 --   esTriangularInferior (listaMatriz [[1,2,3],[1,2,4],[1,2,5]])  ==  False
 -- ----------------------------------------------------------------------------
 
---esTriangularInferior :: (Num a, Eq a) => Matriz a -> Bool
---esTriangularInferior = esTriangularSpuerior (traspuesta m)
+
+esTriangularInferior :: (Num a, Eq a) => Matriz a -> Bool
+esTriangularInferior m = esTriangularSuperior (traspuesta m)
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 23. Definir la función
@@ -310,7 +339,7 @@ esTriangularSuperior m = undefined
 -- ----------------------------------------------------------------------------
 
 esEscalar :: (Num a, Eq a) => Matriz a -> Bool
-esEscalar m = and[m!(1,1) == m!(i,i) | i<-[2..(max (numColumnas m) (numFilas m))]]
+esEscalar m = esTriangularInferior m && esTriangularSuperior m && and[m!(i,i) == m!(1,1) | i<-[1..(min (numFilas m) (numColumnas m))]]
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 24. Definir la función
@@ -322,7 +351,8 @@ esEscalar m = and[m!(1,1) == m!(i,i) | i<-[2..(max (numColumnas m) (numFilas m))
 -- ----------------------------------------------------------------------------
 
 diagonalPrincipal :: Matriz a -> Vector a
-diagonalPrincipal m = listaVector[m!(i,i) | i<-[1..(max (numColumnas m) (numFilas m))]]
+diagonalPrincipal m = let q = min (numFilas m) (numColumnas m) in
+                      array (1,q) [(i, m!(i,i)) | i<-[1..q]]
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 25. Definir la función
@@ -334,7 +364,8 @@ diagonalPrincipal m = listaVector[m!(i,i) | i<-[1..(max (numColumnas m) (numFila
 -- ----------------------------------------------------------------------------
 
 diagonalSecundaria :: Matriz a -> Vector a
-diagonalSecundaria m = undefined
+diagonalSecundaria = undefined
+
 -- ----------------------------------------------------------------------------
 -- Ejercicio 26. Definir la función
 --   antidiagonal :: (Num a, Eq a) => Matriz a -> Bool
@@ -358,7 +389,7 @@ antidiagonal = undefined
 -- ----------------------------------------------------------------------------
 
 posiciones :: Eq a => a -> Matriz a -> [(Int,Int)]
-posiciones q m = [i | i<-indices m, m!i == q]
+posiciones n m = filter (\i -> m!i == n) (indices m)
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 28. Definir la función
@@ -369,7 +400,7 @@ posiciones q m = [i | i<-indices m, m!i == q]
 -- ----------------------------------------------------------------------------
 
 indicesMaximo :: (Num a, Ord a) => Matriz a -> [(Int,Int)]
-indicesMaximo m = undefined
+indicesMaximo m = posiciones (maximum (elems m)) m
 
 -- ----------------------------------------------------------------------------
 -- Ejercicio 29. Una matriz tridiagonal es aquella en la que sólo hay elementos
